@@ -201,7 +201,7 @@ $('fullscreenButton').addEventListener('click',toggleFullscreen);
 document.addEventListener('fullscreenchange',syncFullscreen);
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.body.classList.contains('immersive')){document.body.classList.remove('immersive');syncFullscreen();}});
 $('sampleButton').addEventListener('click',()=>{localStorage.removeItem(mainMode?'pi-track-view-session':'pi-track-view-preview-session');useDemo();});
-$('copyApiKey').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(token);$('copyApiKey').textContent='Copied ✓';setTimeout(()=>$('copyApiKey').textContent='Copy API key',2000);}catch(error){fail(error);}});
+$('copyApiKey').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(token);$('copyApiKey').textContent='Copied ✓';setTimeout(()=>$('copyApiKey').textContent='Copy local key',2000);}catch(error){fail(error);}});
 $('copySessionId').addEventListener('click',async()=>{if(!real)return;try{await navigator.clipboard.writeText(session.id);$('copySessionId').textContent='Copied ✓';setTimeout(()=>$('copySessionId').textContent='Copy session ID',2000);}catch(error){fail(error);}});
 $('previewFile').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{const {id}=await api('/api/sessions',{method:'POST',body:await file.text()});const data=await api(`/api/sessions/${id}`);localStorage.setItem(mainMode?'pi-track-view-session':'pi-track-view-preview-session',id);await useReal(data,file.name);}catch(error){fail(error);}finally{event.target.value='';}});
 $('pinRecord').addEventListener('click',()=>{

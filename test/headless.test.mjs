@@ -34,6 +34,8 @@ test('main viewer shows A, opens a real file, overlays and restores it after ref
   assert.equal(await evaluate('getComputedStyle(document.querySelector(".lab-intro")).display'),'none');
   assert.equal(await evaluate('document.getElementById("viewEyebrow").textContent'),'SESSION TREE');
   assert.equal(await evaluate('document.getElementById("copyApiKey")!==null && document.getElementById("copySessionId")!==null'),true);
+  assert.equal(await evaluate('document.getElementById("copyApiKey").textContent'),'Copy local key');
+  assert.equal(await evaluate('document.getElementById("localKeyHelp")!==null'),true,'users should have an explanation beside the local key');
   assert.equal(await evaluate('(()=>{const actions=[...document.querySelector(".data-actions").children].filter(el=>el.offsetWidth>0&&el.tagName!=="INPUT"),top=actions[0].getBoundingClientRect().top;return actions.every(el=>Math.abs(el.getBoundingClientRect().top-top)<3)})()'),true,'session actions should share one row at desktop width instead of stranding Use example');
   assert.equal(await evaluate('(()=>{const canvas=document.getElementById("previewCanvas").getBoundingClientRect();return [...document.querySelectorAll(".grove-node")].some(el=>{const r=el.getBoundingClientRect();return r.width>200&&r.height>40&&r.x>=canvas.x&&r.x<canvas.right&&r.y>=canvas.y&&r.y<canvas.bottom})})()'),true);
   assert.equal(await evaluate('document.getElementById("previewCanvas").getBoundingClientRect().height>=650'),true);
@@ -231,5 +233,16 @@ test('main viewer shows A, opens a real file, overlays and restores it after ref
   assert.equal(await evaluate('(()=>{const toast=document.getElementById("previewError"),r=toast.getBoundingClientRect();return document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2)===toast})()'),true,'upload errors should remain visible above the centered backdrop');
   await evaluate('document.getElementById("focusInspector").click();document.getElementById("closeInspector").click()');
   assert.equal(await evaluate('document.querySelectorAll(".grove-node").length'),2);
+  await clickAt('#localKeyHelp summary');
+  assert.equal(await evaluate('(()=>{const help=document.getElementById("localKeyHelp"),text=help.textContent.toLowerCase();return help.open&&text.includes("scripts on this computer")&&text.includes("not an ai service key")&&text.includes("normal use")&&text.includes("restarts")&&!/\\b[a-f0-9]{64}\\b/.test(text)})()'),true,'help should explain scope, non-billing, normal use and expiry without exposing the key');
+  assert.equal(await evaluate('(()=>{const p=document.querySelector(".local-key-popover"),r=p.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2)?.closest(".local-key-popover")===p})()'),true,'the explanation must be readable above the tree');
+  if(process.env.PI_TRACK_KEY_HELP_SCREENSHOT)await writeFile(process.env.PI_TRACK_KEY_HELP_SCREENSHOT,Buffer.from((await command('Page.captureScreenshot',{format:'png'})).data,'base64'));
+  await command('Emulation.setDeviceMetricsOverride',{width:390,height:700,deviceScaleFactor:1,mobile:true});
+  await wait(()=>evaluate('innerWidth===390'));
+  assert.equal(await evaluate('(()=>{const p=document.querySelector(".local-key-popover"),r=p.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight})()'),true,'key explanation should fit a narrow screen');
+  if(process.env.PI_TRACK_KEY_HELP_MOBILE_SCREENSHOT)await writeFile(process.env.PI_TRACK_KEY_HELP_MOBILE_SCREENSHOT,Buffer.from((await command('Page.captureScreenshot',{format:'png'})).data,'base64'));
+  await command('Emulation.clearDeviceMetricsOverride');
+  await wait(()=>evaluate('innerWidth>1000'));
+  await clickAt('#localKeyHelp summary');
   await command('Page.reload',{ignoreCache:true});await wait(()=>evaluate('performance.getEntriesByType("navigation")[0]?.type==="reload"&&document.querySelectorAll(".grove-node").length===2&&document.getElementById("overlayCount").textContent.includes("2")'));
 });
