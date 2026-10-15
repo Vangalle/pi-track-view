@@ -49,6 +49,13 @@ test('three previews show actual geometry and preserve node selection, labels an
     if(view==='metro')assert.equal(await evaluate('document.querySelector(".metro-node[data-id=trunk-1] .node-caption").getBoundingClientRect().width >= 48'),true,'type label must have room for message in the compact track');
     if(process.env.PI_TRACK_PREVIEW_SCREENSHOTS_DIR){await new Promise(resolve=>setTimeout(resolve,300));await mkdir(process.env.PI_TRACK_PREVIEW_SCREENSHOTS_DIR,{recursive:true});await writeFile(path.join(process.env.PI_TRACK_PREVIEW_SCREENSHOTS_DIR,`${view}.png`),Buffer.from((await command('Page.captureScreenshot',{format:'png'})).data,'base64'));}
   }
+  await evaluate('document.querySelector("[data-view=metro]").click()');
+  await evaluate('window.__metroCard=document.querySelector(".metro-node[data-id=trunk-8]");document.querySelector(".metro-node[data-id=trunk-9]").click()');
+  assert.equal(await evaluate('window.__metroCard===document.querySelector(".metro-node[data-id=trunk-8]")&&!window.__metroCard.classList.contains("selected")&&document.querySelector(".metro-node[data-id=trunk-9]").classList.contains("selected")'),true,'metro selection should not rebuild every station');
+  await evaluate('document.querySelector("[data-view=atlas]").click();document.querySelector(".atlas-node[data-id=trunk-8]").dispatchEvent(new MouseEvent("click",{bubbles:true}))');
+  assert.equal(await evaluate('document.querySelector(".focus-card.selected").dataset.id'),'trunk-8');
+  await evaluate('document.querySelector(".atlas-node[data-id=trunk-9]").dispatchEvent(new MouseEvent("click",{bubbles:true}))');
+  assert.equal(await evaluate('document.querySelector(".focus-card.selected").dataset.id'),'trunk-9','the atlas neighborhood must still follow focus changes');
   await evaluate('document.getElementById("typeFilterButton").click()');
   await evaluate('document.querySelector("#typeFilterOptions input[value=usage]").click()');
   await evaluate('document.querySelector("#typeFilterOptions input[value=compaction]").click()');

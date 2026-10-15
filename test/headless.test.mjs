@@ -56,7 +56,8 @@ test('main viewer shows A, opens a real file, overlays and restores it after ref
   assert.equal(await evaluate('document.getElementById("pinRecord").getAttribute("aria-pressed")'),'true');
   assert.equal(await evaluate('document.getElementById("pinRaw").textContent.includes("trunk-8")'),true);
   assert.equal(await evaluate('document.getElementById("focusRaw").textContent.includes("Choose another node")'),true);
-  await evaluate('document.querySelector(".grove-node[data-id=trunk-9]").click()');
+  await evaluate('window.__selectedCard=document.querySelector(".grove-node[data-id=trunk-8]");document.querySelector(".grove-node[data-id=trunk-9]").click()');
+  assert.equal(await evaluate('window.__selectedCard===document.querySelector(".grove-node[data-id=trunk-8]")&&!window.__selectedCard.classList.contains("selected")&&document.querySelector(".grove-node[data-id=trunk-9]").classList.contains("selected")&&document.getElementById("selectionId").textContent==="trunk-9"'),true,'selecting another grove card should update focus without replacing the tree');
   assert.equal(await evaluate('JSON.parse(document.getElementById("pinRaw").textContent).id'),'trunk-8');
   assert.equal(await evaluate('JSON.parse(document.getElementById("focusRaw").textContent).id'),'trunk-9');
   assert.equal(await evaluate('(()=>{const panel=document.getElementById("previewInspector"),left=document.getElementById("pinRaw").getBoundingClientRect(),right=document.getElementById("focusRaw").getBoundingClientRect();return panel.classList.contains("open")&&Math.abs(panel.getBoundingClientRect().height-Number('+plainHeight+'))<1&&left.width>200&&right.width>200&&left.right<right.left&&right.right<=innerWidth})()'),true,'pinned and focused JSON are visible side by side in fullscreen');
@@ -190,6 +191,9 @@ test('main viewer shows A, opens a real file, overlays and restores it after ref
   assert.equal(await evaluate('document.getElementById("pinRecord").getAttribute("aria-pressed")'),'true');
   const {root}=await command('DOM.getDocument');const {nodeId}=await command('DOM.querySelector',{nodeId:root.nodeId,selector:'#previewFile'});
   await command('DOM.setFileInputFiles',{nodeId,files:[file]});await wait(()=>evaluate('document.querySelectorAll(".grove-node").length===2'));
+  await evaluate('window.__unchangedOverlayStage=document.querySelector(".grove-stage")');
+  await new Promise(resolve=>setTimeout(resolve,1900));
+  assert.equal(await evaluate('document.querySelector(".grove-stage")===window.__unchangedOverlayStage'),true,'unchanged annotation polls must leave the displayed tree intact');
   assert.equal(await evaluate('document.getElementById("pinRecord").getAttribute("aria-pressed")'),'false');
   assert.equal(await evaluate('document.getElementById("comparePane").hidden'),true);
   assert.equal(await evaluate('document.getElementById("typeFilterButton").textContent.includes("All")'),true);
@@ -210,6 +214,7 @@ test('main viewer shows A, opens a real file, overlays and restores it after ref
   const sid=await evaluate('localStorage.getItem("pi-track-view-session")');assert.ok(sid);
   const response=await fetch(base+`/api/sessions/${sid}/annotations/ext`,{method:'PUT',headers:{authorization:'Bearer e2e-token','content-type':'application/json'},body:JSON.stringify({nodes:[{id:'n1',label:'WATCH',highlight:true}],edges:[{from:'n1',to:'n2',highlight:true}]})});assert.equal(response.status,204);
   await wait(()=>evaluate('document.getElementById("overlayCount").textContent.includes("2")'));
+  assert.equal(await evaluate('document.querySelector(".grove-stage")!==window.__unchangedOverlayStage'),true,'a real annotation change must redraw the tree');
   assert.equal(await evaluate('document.querySelector(".grove-node[data-id=n1]").textContent.includes("WATCH")'),true);
   await evaluate('document.getElementById("typeFilterButton").click()');
   await evaluate('document.querySelector("#typeFilterOptions input[value=message]").click()');

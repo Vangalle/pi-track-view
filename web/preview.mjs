@@ -157,10 +157,15 @@ function hideInspector({restoreFocus=false}={}){const panel=$('previewInspector'
 function showRecord(id){const node=graph.nodes.get(id);if(!node)return;const info=recordView(node.entry);displayedId=id;$('recordTitle').textContent=info.title;$('recordId').textContent=`NODE / ${node.id}`;$('recordRaw').textContent=info.raw;$('recordContent').textContent=info.blocks.length?info.blocks.map(block=>block.text).join('\n\n'):info.raw;
   $('pinRecord').disabled=false;if(pinned){comparedFocusId=id;syncPin();}
   $('previewInspector').classList.add('open');$('previewInspector').setAttribute('aria-hidden','false');}
-function choose(id){if(!visibleGraph.nodes.has(id))return;selected=id;showRecord(id);render();}
+function choose(id){if(!visibleGraph.nodes.has(id))return;selected=id;showRecord(id);
+  if(view==='atlas'){render();return;}
+  const host=$('sceneHost');host.querySelector('.preview-node.selected')?.classList.remove('selected');
+  for(const card of host.querySelectorAll('.preview-node'))if(card.dataset.id===id){card.classList.add('selected');break;}
+  $('selectionId').textContent=id;
+}
 function useDemo(){clearInterval(pollTimer);session=demoSession();graph=toGraph(session);selectedTypes=null;expandedGaps.clear();resetPin();visibleGraph=graph;overlay=demoOverlay();selected='trunk-8';real=false;$('dataBadge').textContent='●   SYNTHETIC EXAMPLE';$('previewEditor').disabled=true;$('copySessionId').disabled=true;hideInspector();buildTypeFilter();render({resetScroll:true});}
 async function useReal(data,label){clearInterval(pollTimer);session=data;graph=toGraph(data);selectedTypes=null;expandedGaps.clear();resetPin();visibleGraph=graph;overlay={nodes:[],edges:[]};selected=graph.roots[0]??null;real=true;$('previewEditor').disabled=false;$('dataBadge').textContent=`●   ${label.slice(0,38)}`;$('copySessionId').disabled=false;hideInspector();buildTypeFilter();render({resetScroll:true});
-  const id=data.id;async function poll(){try{const current=await api(`/api/sessions/${id}/annotations`);if(real&&session.id===id){overlay=current;render();}}catch(error){fail(error);clearInterval(pollTimer);}}
+  const id=data.id;async function poll(){try{const current=await api(`/api/sessions/${id}/annotations`);if(real&&session.id===id&&JSON.stringify(current)!==JSON.stringify(overlay)){overlay=current;render();}}catch(error){fail(error);clearInterval(pollTimer);}}
   await poll();pollTimer=setInterval(poll,1400);
 }
 for(const button of document.querySelectorAll('[data-view]'))button.addEventListener('click',()=>{view=button.dataset.view;render({resetScroll:true});});
