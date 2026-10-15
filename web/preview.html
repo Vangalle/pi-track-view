@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tree view concepts · pi-track-view</title>
+  <link rel="stylesheet" href="/preview.css">
+</head>
+<body>
+<div class="lab">
+  <header class="lab-header">
+    <a class="wordmark" href="/" aria-label="pi-track-view home"><span class="pi-mark">π</span><span>track<span class="wordmark-accent">view</span><small id="brandSubtitle">VISUAL STUDIES</small></span></a>
+    <nav class="view-tabs" aria-label="Compare tree views">
+      <button type="button" data-view="grove" aria-pressed="true"><span class="tab-number">01</span> Conversation grove</button>
+      <button type="button" data-view="metro" aria-pressed="false"><span class="tab-number">02</span> Metro tracks</button>
+      <button type="button" data-view="atlas" aria-pressed="false"><span class="tab-number">03</span> Atlas + focus</button>
+    </nav>
+    <a class="back-link" href="/">Current viewer ↗</a>
+  </header>
+  <div class="lab-intro">
+    <div><span class="overline">INTERACTIVE COMPARISON <span class="slash">/</span> PI SESSION TREE</span><h1 id="introTitle">One session. <em>Three ways to see it.</em></h1><p id="introDescription">Same entries, same edges. Change the view, not the underlying conversation.</p></div>
+    <div class="comparison-number"><span>DESIGN STUDY</span><strong>03<span> / 03</span></strong><small>CLICK · EXPLORE · COMPARE</small></div>
+  </div>
+  <div class="workbench">
+    <div class="workbench-head">
+      <div class="view-description"><div id="viewEyebrow" class="small-label">01 / CONVERSATION GROVE</div><h2 id="viewTitle">Follow the conversation.</h2><p id="viewDescription">A vertical, readable path. Branches spread sideways instead of squeezing the entire session into one line.</p></div>
+      <div class="data-actions"><button type="button" id="copyApiKey" class="text-button">Copy API key</button><button type="button" id="copySessionId" class="text-button">Copy session ID</button><span id="dataBadge" class="source-badge">● &nbsp; SYNTHETIC EXAMPLE</span><label class="file-button" for="previewFile">Open your .jsonl <span>↗</span></label><input id="previewFile" type="file" accept=".jsonl,application/x-ndjson" hidden><button type="button" id="previewEditor" class="session-editor" disabled>Open formatted session in VS Code ↗</button><button id="sampleButton" type="button" class="text-button">Use example</button></div>
+    </div>
+    <div class="controls"><div class="control-group"><span class="control-caption">NODE LABELS</span><div class="switches" role="group" aria-label="Node label mode"><button data-label-mode="none" aria-pressed="false">None</button><button data-label-mode="id" aria-pressed="false">ID</button><button data-label-mode="type" aria-pressed="true">Type</button></div></div><div class="type-filter"><button type="button" id="typeFilterButton" aria-expanded="false" aria-controls="typeFilterPanel">Filter type · All</button><div id="typeFilterPanel" class="type-filter-panel" hidden><div class="filter-heading">SHOW TYPES</div><button type="button" id="typeFilterAll" aria-pressed="true">All types</button><div id="typeFilterOptions" class="type-filter-options"></div></div></div><button type="button" id="fullscreenButton" aria-pressed="false" aria-label="Enter fullscreen" title="Fullscreen tree">⛶ Fullscreen</button><div class="control-meta"><span id="nodeCount">0 nodes</span><span id="overlayCount">0 annotations</span><span class="selected-chip">FOCUS <b id="selectionId">—</b></span></div></div>
+    <div id="previewCanvas" class="preview-canvas view-grove"><div id="sceneHost" class="scene-host"></div><div class="canvas-guide"><span id="canvasHint">SCROLL TO FOLLOW THE PATH · CLICK A NODE TO INSPECT</span><span id="previewSessionId" class="session-id" aria-label="Session ID">demo</span></div></div>
+  </div>
+  <footer class="lab-footer"><span>THE DATA NEVER CHANGES BETWEEN VIEWS</span><div><i class="legend-dot"></i> Type colors <span>·</span> External annotations remain separate <span>·</span> Original JSONL stays untouched</div></footer>
+</div>
+<div id="previewError" class="error-toast" role="alert" hidden></div>
+<div id="inspectorBackdrop" class="inspector-backdrop" aria-hidden="true"></div>
+<aside id="previewInspector" class="inspector" aria-label="Single selected entry" aria-hidden="true">
+  <div class="inspector-grip"></div>
+  <div class="inspector-head"><div><span class="small-label"><span id="inspectorMode">ISOLATED ENTRY</span> <span class="slash">/</span> RAW SESSION RECORD</span><h2 id="recordTitle">Entry</h2><p id="recordId"></p></div><div class="inspector-actions"><button type="button" id="pinRecord" aria-label="Pin entry" aria-pressed="false" disabled>Pin</button><button type="button" id="focusInspector" aria-pressed="false">Focus view</button><button type="button" id="closeInspector" aria-label="Close entry">×</button></div></div>
+  <div id="recordContent" class="record-content"></div><details><summary>Complete entry JSON</summary><pre id="recordRaw"></pre></details>
+  <div id="comparePane" class="compare-pane" aria-label="Pinned record comparison" hidden><section class="compare-column" aria-label="Pinned record JSON"><h3>PINNED <span id="pinId"></span></h3><pre id="pinRaw"></pre></section><section class="compare-column" aria-label="Focused record JSON"><h3>FOCUS <span id="focusId"></span></h3><pre id="focusRaw"></pre></section></div>
+</aside>
+<script type="module" src="/preview.mjs"></script>
+</body></html>
